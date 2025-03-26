@@ -10,6 +10,7 @@ void voltar_ao_menu();
 int perguntas_respostas(); 
 int Cobra_na_caixa();
 void gousma_war();
+void sair();
 
 int main() {
     int options;
@@ -35,6 +36,16 @@ int main() {
         gousma_war();
     }
     
+    else if (options == 4){
+        sair();
+    }
+
+    else{
+        printf("digite algo valido");
+        getchar();
+        getchar();
+        main();
+    }
     return 0; 
 }
 
@@ -74,6 +85,13 @@ void voltar_ao_menu() {
     getchar(); // Espera o usuário pressionar enter
     main(); // Chama a função principal novamente
 }
+
+// Função para sair do jogo
+void sair(){
+    printf("desligando...");
+    exit;
+}
+
 
 // Função do jogo de Perguntas e Respostas
 int perguntas_respostas() {
