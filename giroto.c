@@ -477,8 +477,8 @@ void gousma_war(){
     
     system("cls");
     
-    int handp1 = 1, handp2 = 1;  // Seus gousmas (mao 1 e mao 2)
-    int handb1 = 1, handb2 = 1;  // Gousmas do bot
+    int handp1 = 1, handp2 = 1;  // Suas mãos (mão 1 e mão 2)
+    int handb1 = 1, handb2 = 1;  // Mãos do bot
     char inicio3;
     
     srand(time(NULL));
@@ -497,7 +497,14 @@ void gousma_war(){
             system("cls");
             separador();
             printf("SUAS MAOS: [Mao 1: %d] [Mao 2: %d]\n", handp1, handp2);
-            printf("MAOS DO BOT: [%d] [%d]\n", handb1, handb2);
+            
+            // Mostra as mãos do bot, marcando como "X" se estiverem >=5 (inutilizáveis)
+            printf("MAOS DO BOT: [");
+            printf(handb1 >= 5 ? "X" : "%d", handb1);
+            printf("] [");
+            printf(handb2 >= 5 ? "X" : "%d", handb2);
+            printf("]\n");
+            
             separador();
             
             // Turno do jogador
@@ -514,11 +521,19 @@ void gousma_war(){
             if (escolha_mao == 1 || escolha_mao == 2) {
                 separador();
                 printf("Escolha qual MAO do BOT atacar:\n");
-                printf("1 - Mao 1 do bot (%d)\n", handb1);
-                printf("2 - Mao 2 do bot (%d)\n", handb2);
+                printf("1 - Mao 1 do bot (%s)\n", handb1 >= 5 ? "X" : (handb1 == 0 ? "0" : "Ativo"));
+                printf("2 - Mao 2 do bot (%s)\n", handb2 >= 5 ? "X" : (handb2 == 0 ? "0" : "Ativo"));
                 printf("Escolha: ");
                 separador();
                 scanf("%d", &escolha_alvo);
+                
+                // Verifica se a mão do bot escolhida está disponível
+                if ((escolha_alvo == 1 && handb1 >= 5) || (escolha_alvo == 2 && handb2 >= 5)) {
+                    printf("Essa mao do bot ja explodiu! Escolha outra.\n");
+                    printf("Pressione ENTER para continuar...");
+                    getchar(); getchar();
+                    continue;
+                }
                 
                 if (escolha_mao == 1) {
                     if (escolha_alvo == 1) handb1 += handp1;
@@ -537,45 +552,75 @@ void gousma_war(){
                 handp2 = total - handp1;
                 printf("Voce dividiu suas maos igualmente!\n");
             }
+            else {
+                printf("Opcao invalida! Tente novamente.\n");
+                printf("Pressione ENTER para continuar...");
+                getchar(); getchar();
+                continue;
+            }
             
             printf("Pressione ENTER para continuar...");
             getchar(); getchar();
             
-            // Verifica vitoria
-            if (handb1 >= 5 || handb2 >= 5) {
+            // Verifica vitoria (ambas as mãos do bot >=5)
+            if (handb1 >= 5 && handb2 >= 5) {
                 system("cls");
                 printf("VOCE VENCEU! As maos do bot explodiram!\n");
                 break;
             }
             
-            // Turno do bot (logica simples)
+            // Turno do bot (lógica melhorada)
             printf("\nVEZ DO BOT (pressione ENTER)...");
             getchar();
             system("cls");
             
-            if (rand() % 2 == 0 && (handb1 + handb2) > 3) {
-                // Bot escolhe dividir
-                int total = handb1 + handb2;
-                handb1 = total / 2;
-                handb2 = total - handb1;
-                printf("O bot dividiu as maos dele!\n");
-            } else {
-                // Bot escolhe atacar
-                int mao_ataque = (handb1 > handb2) ? handb1 : handb2;
-                if (rand() % 2 == 0) {
-                    handp1 += mao_ataque;
-                    printf("O bot atacou sua Mao 1 com forca %d!\n", mao_ataque);
-                } else {
-                    handp2 += mao_ataque;
-                    printf("O bot atacou sua Mao 2 com forca %d!\n", mao_ataque);
+            // Verifica quais mãos do bot estão disponíveis para ataque
+            int bot_pode_atacar_com_1 = (handb1 < 5 && handb1 > 0);
+            int bot_pode_atacar_com_2 = (handb2 < 5 && handb2 > 0);
+            
+            // Se o bot não puder atacar com nenhuma mão, ele tenta dividir
+            if (!bot_pode_atacar_com_1 && !bot_pode_atacar_com_2) {
+                printf("O bot nao pode atacar! Passando a vez...\n");
+            }
+            else {
+                // Decide aleatoriamente entre atacar ou dividir (se possível)
+                if (rand() % 2 == 0 && (handb1 + handb2) > 3) {
+                    // Divide
+                    int total = handb1 + handb2;
+                    handb1 = total / 2;
+                    handb2 = total - handb1;
+                    printf("O bot dividiu as maos dele!\n");
+                }
+                else {
+                    // Ataca com uma mão válida
+                    int mao_ataque;
+                    if (bot_pode_atacar_com_1 && bot_pode_atacar_com_2) {
+                        mao_ataque = (handb1 > handb2) ? handb1 : handb2;
+                    }
+                    else if (bot_pode_atacar_com_1) {
+                        mao_ataque = handb1;
+                    }
+                    else {
+                        mao_ataque = handb2;
+                    }
+                    
+                    // Escolhe aleatoriamente qual mão do jogador atacar
+                    if (rand() % 2 == 0) {
+                        handp1 += mao_ataque;
+                        printf("O bot atacou sua Mao 1 com forca %d!\n", mao_ataque);
+                    }
+                    else {
+                        handp2 += mao_ataque;
+                        printf("O bot atacou sua Mao 2 com forca %d!\n", mao_ataque);
+                    }
                 }
             }
             
             printf("Pressione ENTER para continuar...");
             getchar();
             
-            // Verifica derrota
-            if (handp1 >= 5 || handp2 >= 5) {
+            // Verifica derrota (ambas as suas mãos >=5)
+            if (handp1 >= 5 && handp2 >= 5) {
                 system("cls");
                 printf("VOCE PERDEU! Suas maos explodiram!\n");
                 break;
@@ -585,11 +630,23 @@ void gousma_war(){
         // Jogar novamente?
         separador();
         printf("Jogar novamente? (y/n): ");
+        separador();
+        
         scanf(" %c", &inicio3);
+    
+        if (inicio3 == 'y' || inicio3 == 'Y'){
+            gousma_war();
+        }
+        else if (inicio3 == 'y' || inicio3 == 'Y'){
+            main();
+        }
     }
+    
     // Voltar ao menu
     printf("Pressione ENTER para voltar ao menu...");
-    getchar(); getchar();
+    getchar(); 
+    getchar();
+    main();
 }
     
 
